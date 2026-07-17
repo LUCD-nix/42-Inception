@@ -1,0 +1,97 @@
+services:
+  nginx:
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    image: inception-nginx:bookworm
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      # In production, you’ll terminate TLS on 443 here
+      # - "443:443"
+    volumes:
+      - wp_content:/var/www/html:ro
+      # Optional: if you manage full core as a volume, mount ./html too
+      # - ./html:/var/www/html
+    networks:
+      - inception
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 1
+
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    image: inception-wordpress:bookworm
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: supersecret
+      WORDPRESS_DB_NAME: wpdb
+      PHP_MEMORY_LIMIT: 256M
+    volumes:
+      - wp_content:/var/www/html/
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - inception
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm8.2 -t >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  db:
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    image: inception-mariadb:bookworm
+    environment:
+      MYSQL_DATABASE: wpdb
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: supersecret
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MARIADB_DATABASE: wpdb
+      MARIADB_USER: wpuser
+      MARIADB_PASSWORD: supersecret
+      MARIADB_ROOT_PASSWORD: rootsecret
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - inception
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "mariadb-admin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  inception:
+  # it is the default, we don't have to specify
+    driver: bridge
+
+volumes:
+  db_data:
+    name: db_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/lucasd/data/mariadb
+
+  wp_content:
+    name: wp_content
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/lucasd/data/wordpress
