@@ -1,7 +1,7 @@
 FROM debian:bookworm
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends nginx ca-certificates curl \
+    && apt-get install -y --no-install-recommends nginx ca-certificates curl openssl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -14,7 +14,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
     && mkdir -p /run/nginx /var/www/html \
     && chown -R nginx:nginx /var/www/html
 
-EXPOSE 80
+EXPOSE 443
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

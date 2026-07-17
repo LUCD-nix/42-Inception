@@ -8,9 +8,7 @@ services:
       wordpress:
         condition: service_healthy
     ports:
-      - "80:80"
-      # In production, you’ll terminate TLS on 443 here
-      # - "443:443"
+      - "443:443"
     volumes:
       - wp_content:/var/www/html:ro
       # Optional: if you manage full core as a volume, mount ./html too
@@ -18,7 +16,7 @@ services:
     networks:
       - inception
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost/ >/dev/null || exit 1"]
+      test: ["CMD-SHELL", "curl -kfsS https://localhost/ >/dev/null || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 1
