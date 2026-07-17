@@ -6,6 +6,10 @@ SSL_CERT="$SSL_DIR/nginx.crt"
 SSL_KEY="$SSL_DIR/nginx.key"
 SSL_SUBJECT="${SSL_SUBJECT:-/C=FR/ST=IDF/L=Paris/O=42/OU=Inception/CN=localhost}"
 
+if [ -n "${SSL_SUBJECT_FILE:-}" ] && [ -f "$SSL_SUBJECT_FILE" ]; then
+  SSL_SUBJECT="$(tr -d '\r\n' < "$SSL_SUBJECT_FILE")"
+fi
+
 mkdir -p "$SSL_DIR"
 
 if [ ! -f "$SSL_CERT" ] || [ ! -f "$SSL_KEY" ]; then

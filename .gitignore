@@ -1,1 +1,2 @@
-*.org
+secrets/*
+!secrets/.gitkeep
