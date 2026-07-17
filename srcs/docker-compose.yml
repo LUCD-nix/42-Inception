@@ -8,7 +8,7 @@ services:
       wordpress:
         condition: service_healthy
     ports:
-      - "443:443"
+      - "${NGINX_PORT}:443"
     volumes:
       - wp_content:/var/www/html:ro
       # Optional: if you manage full core as a volume, mount ./html too
@@ -27,11 +27,11 @@ services:
       dockerfile: Dockerfile
     image: inception-wordpress:bookworm
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: ${DB_HOST}
       WORDPRESS_DB_USER: wpuser
       WORDPRESS_DB_PASSWORD: supersecret
-      WORDPRESS_DB_NAME: wpdb
-      PHP_MEMORY_LIMIT: 256M
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT}
     volumes:
       - wp_content:/var/www/html/
     depends_on:
@@ -51,11 +51,11 @@ services:
       dockerfile: Dockerfile
     image: inception-mariadb:bookworm
     environment:
-      MYSQL_DATABASE: wpdb
+      MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: wpuser
       MYSQL_PASSWORD: supersecret
       MYSQL_ROOT_PASSWORD: rootsecret
-      MARIADB_DATABASE: wpdb
+      MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: wpuser
       MARIADB_PASSWORD: supersecret
       MARIADB_ROOT_PASSWORD: rootsecret
@@ -84,7 +84,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/lucasd/data/mariadb
+      device: ${MARIADB_DATA_PATH}
 
   wp_content:
     name: wp_content
@@ -92,4 +92,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/lucasd/data/wordpress
+      device: ${WORDPRESS_DATA_PATH}
