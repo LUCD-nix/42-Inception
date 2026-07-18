@@ -3,7 +3,7 @@ services:
     build:
       context: ./requirements/nginx
       dockerfile: Dockerfile
-    image: inception-nginx:bookworm
+    image: nginx
     depends_on:
       wordpress:
         condition: service_healthy
@@ -29,7 +29,7 @@ services:
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
-    image: inception-wordpress:bookworm
+    image: wordpress
     environment:
       WORDPRESS_DB_HOST: ${DB_HOST}
       WORDPRESS_DB_USER_FILE: /run/secrets/db_user
@@ -56,7 +56,7 @@ services:
     build:
       context: ./requirements/mariadb
       dockerfile: Dockerfile
-    image: inception-mariadb:bookworm
+    image: db
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER_FILE: /run/secrets/db_user
